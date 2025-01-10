@@ -5,10 +5,10 @@ const { Pool } = require('pg');
 
 const app = express();
 const pool = new Pool({
-  user: 'your-db-user',
+  user: 'ZeiPara',
   host: 'localhost',
-  database: 'your-database',
-  password: 'your-db-password',
+  database: 'hatena-scratch',
+  password: '12345',
   port: 5432,
 });
 
