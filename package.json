@@ -1,5 +1,5 @@
 {
-  "name": "my-project",
+  "name": "hatena-api",
   "version": "1.0.0",
   "description": "A simple project with authentication",
   "main": "index.js",
@@ -17,8 +17,8 @@
     "nodemon": "^2.0.19"
   },
   "engines": {
-    "node": "14.x"
+  "node": "18.x"
   },
-  "author": "Your Name",
+  "author": "ZeiPara",
   "license": "MIT"
 }
