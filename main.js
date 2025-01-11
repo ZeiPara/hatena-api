@@ -16,6 +16,10 @@ const pool = new Pool({
 
 app.use(express.json()); // リクエストのボディをJSONとしてパース
 
+app.get('/', (req, res) => {
+    res.send('正常に稼働しています');
+});
+
 // ユーザー登録エンドポイント
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
