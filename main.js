@@ -5,13 +5,8 @@ const { Pool } = require('pg'); // PostgreSQLを使う場合
 const app = express();
 const cors = require('cors');
 app.use(cors()); // 全てのリクエストを許可
-
 const pool = new Pool({
-  user: 'ZeiPara',
-  host: 'localhost',
-  database: 'hatena-database',
-  password: '12345',
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
 });
 
 app.use(express.json()); // リクエストのボディをJSONとしてパース
