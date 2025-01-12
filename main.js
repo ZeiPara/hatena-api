@@ -81,9 +81,10 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.get('/token/check', authenticateToken, (req, res) => {
-  res.json({ isAuthenticated: true });
+app.get('/auth/check', authenticateToken, (req, res) => {
+  res.json({ isAuthenticated: true, user: req.user });
 });
+
 
 // ログインエンドポイント
 app.post('/login', async (req, res) => {
