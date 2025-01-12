@@ -8,6 +8,22 @@ app.use(cors()); // 全てのリクエストを許可
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Authorizationヘッダーからトークンを取得
+
+  if (!token) {
+    return res.status(401).json({ error: 'トークンが見つかりません' });
+  }
+
+  jwt.verify(token, 'your-secret-key', (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'トークンが無効です' });
+    }
+    req.user = user; // トークンが有効な場合、ユーザーデータをリクエストに保存
+    next(); // 次の処理へ進む
+  });
+};
 
 const createTableQuery = `
   CREATE TABLE IF NOT EXISTS users (
