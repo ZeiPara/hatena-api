@@ -92,7 +92,8 @@ app.post('/login', async (req, res) => {
     }
 
     // JWTの発行
-    const token = jwt.sign({ userId: user.id }, 'your-secret-key', { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user.id }, 'ZeiParasecret', { expiresIn: '7d' }); // 7日間有効
+
 
     // トークンを返す
     res.json({ message: 'ログイン成功', token });
