@@ -9,6 +9,19 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+  );
+`;
+
+pool.query(createTableQuery)
+  .then(() => console.log('Users table created successfully'))
+  .catch(err => console.error('Error creating users table:', err));
+
+
 app.use(express.json()); // リクエストのボディをJSONとしてパース
 
 app.get('/', (req, res) => {
