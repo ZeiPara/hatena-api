@@ -65,6 +65,10 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.get('/token/check', authenticateToken, (req, res) => {
+  res.json({ isAuthenticated: true });
+});
+
 // ログインエンドポイント
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
