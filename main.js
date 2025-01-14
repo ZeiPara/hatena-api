@@ -1,13 +1,26 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { Pool } = require('pg'); // PostgreSQLを使う場合
+const { Pool } = require('pg');
 const app = express();
 const cors = require('cors');
-app.use(cors()); // 全てのリクエストを許可
+
+app.use(cors());
+app.use(express.json());
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
+
+// テーブル作成クエリを定義
+const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+  );
+`;
+
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Authorizationヘッダーからトークンを取得
