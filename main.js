@@ -16,22 +16,15 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'トークンが見つかりません' });
   }
 
-  jwt.verify(token, 'your-secret-key', (err, user) => {
+  jwt.verify(token, 'ZeiParasecret', (err, user) => {
     if (err) {
+      console.error('JWT検証エラー:', err.message);
       return res.status(403).json({ error: 'トークンが無効です' });
     }
     req.user = user; // トークンが有効な場合、ユーザーデータをリクエストに保存
     next(); // 次の処理へ進む
   });
 };
-
-const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-  );
-`;
 
 const interval = setInterval(function() {
   console.log("サーバーは稼働中");
