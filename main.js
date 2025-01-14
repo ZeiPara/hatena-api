@@ -43,10 +43,11 @@ const interval = setInterval(function() {
   console.log("サーバーは稼働中");
 }, 10000);
 
+/*
 pool.query(createTableQuery)
   .then(() => console.log('Users table created successfully'))
   .catch(err => console.error('Error creating users table:', err));
-
+*/
 
 app.use(express.json()); // リクエストのボディをJSONとしてパース
 
