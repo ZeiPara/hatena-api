@@ -55,6 +55,25 @@ app.get('/', (req, res) => {
     res.send('正常に稼働しています');
 });
 
+app.get('/user/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    // ユーザー情報をPostgreSQLから取得
+    const result = await pool.query('SELECT username, profile FROM users WHERE username = $1', [username]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'ユーザーが見つかりません' });
+    }
+
+    // ユーザー情報を返す
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'サーバーエラー' });
+  }
+});
+
 // ユーザー登録エンドポイント
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
