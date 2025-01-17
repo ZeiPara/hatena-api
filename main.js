@@ -56,7 +56,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/user/:username', async (req, res) => {
-  const { username } = req.params;
+  const username = req.params.username;
   console.log('${username} のリクエストを受け付けました');
 
   try {
