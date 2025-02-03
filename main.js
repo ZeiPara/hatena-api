@@ -120,6 +120,16 @@ app.get('/auth/check', authenticateToken, (req, res) => {
   res.json({ isAuthenticated: true, user: req.user });
 });
 
+app.post('creatproject', async (req, res) => {
+  const { user, title, content } = req.body;
+  let d = new Date();
+  let date = `${d.getFullYear()}/${d.getMonth()}/${d.getDay()}`
+  const client = await projectpool.connect();
+  await client.query(
+      'INSERT INTO users (user, content, date, title) VALUES ($1, $2, $3, $4)',
+      [user, content, date, title]
+    );
+});
 
 // ログインエンドポイント
 app.post('/login', async (req, res) => {
