@@ -1,10 +1,11 @@
+require('dotenv').config(); // 環境変数を読み込む
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
-const app = express();
 const cors = require('cors');
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -16,62 +17,45 @@ const projectpool = new Pool({
   connectionString: process.env.PROJECT_DATABASE_URL,
 });
 
-// テーブル作成クエリを定義
-const createTableQuery = `
-  CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-  );
-`;
-
+// ユーザー認証用のミドルウェア
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Authorizationヘッダーからトークンを取得
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ error: 'トークンが見つかりません' });
   }
 
-  jwt.verify(token, 'ZeiParasecret', (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       console.error('JWT検証エラー:', err.message);
       return res.status(403).json({ error: 'トークンが無効です' });
     }
-    req.user = user; // トークンが有効な場合、ユーザーデータをリクエストに保存
-    next(); // 次の処理へ進む
+    req.user = user;
+    next();
   });
 };
 
-const interval = setInterval(function() {
-  console.log("サーバーは稼働中");
-}, 10000);
+// サーバーが動いていることを確認するログ
+setInterval(() => console.log("サーバーは稼働中"), 10000);
 
-/*
-pool.query(createTableQuery)
-  .then(() => console.log('Users table created successfully'))
-  .catch(err => console.error('Error creating users table:', err));
-*/
-
-app.use(express.json()); // リクエストのボディをJSONとしてパース
-
+// ルートエンドポイント
 app.get('/', (req, res) => {
-    res.send('正常に稼働しています');
+  res.send('正常に稼働しています');
 });
 
+// ユーザー情報取得
 app.get('/user/:username', async (req, res) => {
   const username = req.params.username;
-  console.log('${username} のリクエストを受け付けました');
+  console.log(`${username} のリクエストを受け付けました`);
 
   try {
-    // ユーザー情報をPostgreSQLから取得
     const result = await pool.query('SELECT username, profile FROM users WHERE username = $1', [username]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'ユーザーが見つかりません' });
     }
 
-    // ユーザー情報を返す
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
@@ -79,34 +63,30 @@ app.get('/user/:username', async (req, res) => {
   }
 });
 
-// ユーザー登録エンドポイント
+// ユーザー登録
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
-  // 必須項目の検証
   if (!username || !password) {
     return res.status(400).json({ error: 'ユーザー名とパスワードを入力してください' });
   }
+  if (username.length > 30) {
+    return res.status(400).json({ error: 'ユーザー名は30文字以内にしてください' });
+  }
+  if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return res.status(400).json({ error: 'パスワードは8文字以上で、英数字を含める必要があります' });
+  }
 
   const client = await pool.connect();
-  
   try {
-    // ユーザー名がすでに存在するかをチェック
     const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
     if (result.rows.length > 0) {
       return res.status(400).json({ error: 'そのユーザー名はすでに存在しています' });
     }
 
-    // パスワードのハッシュ化
     const hashedPassword = await bcrypt.hash(password, 10);
+    await client.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
 
-    // ユーザーをデータベースに追加
-    await client.query(
-      'INSERT INTO users (username, password) VALUES ($1, $2)',
-      [username, hashedPassword]
-    );
-
-    // 成功レスポンス
     res.status(201).json({ message: 'ユーザー登録が完了しました' });
   } catch (error) {
     console.error(error);
@@ -116,52 +96,61 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// 認証チェック
 app.get('/auth/check', authenticateToken, (req, res) => {
   res.json({ isAuthenticated: true, user: req.user });
 });
 
-app.post('creatproject', async (req, res) => {
-  const { user, title, content } = req.body;
+// プロジェクト作成
+app.post('/createproject', authenticateToken, async (req, res) => {
+  const { title, content } = req.body;
+  const user = req.user.username;
+
+  if (!title || !content) {
+    return res.status(400).json({ error: 'タイトルと内容を入力してください' });
+  }
+
   let d = new Date();
-  let date = `${d.getFullYear()}/${d.getMonth()}/${d.getDay()}`
+  let date = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+
   const client = await projectpool.connect();
-  await client.query(
-      'INSERT INTO users (user, content, date, title) VALUES ($1, $2, $3, $4)',
+  try {
+    await client.query(
+      'INSERT INTO projects (user, content, date, title) VALUES ($1, $2, $3, $4)',
       [user, content, date, title]
     );
+    res.status(201).json({ message: 'プロジェクトが作成されました' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  } finally {
+    client.release();
+  }
 });
 
-// ログインエンドポイント
+// ログイン
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  // 必須項目の検証
   if (!username || !password) {
     return res.status(400).json({ error: 'ユーザー名とパスワードを入力してください' });
   }
 
   const client = await pool.connect();
-  
   try {
-    // ユーザー名が存在するかを確認
     const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
     if (result.rows.length === 0) {
       return res.status(400).json({ error: 'ユーザー名またはパスワードが間違っています' });
     }
 
     const user = result.rows[0];
-
-    // パスワードが一致するか確認
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return res.status(400).json({ error: 'ユーザー名またはパスワードが間違っています' });
     }
 
-    // JWTの発行
-    const token = jwt.sign({ userId: user.id, username:username }, 'ZeiParasecret', { expiresIn: '7d' }); // 7日間有効
+    const token = jwt.sign({ userId: user.id, username: username }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-
-    // トークンを返す
     res.json({ message: 'ログイン成功', token });
   } catch (error) {
     console.error(error);
@@ -172,7 +161,7 @@ app.post('/login', async (req, res) => {
 });
 
 // サーバー起動
-const PORT = process.env.PORT || 3000; // 環境変数 PORT を優先
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
