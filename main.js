@@ -9,7 +9,11 @@ app.use(cors());
 app.use(express.json());
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.USER_DATABASE_URL,
+});
+
+const projectpool = new Pool({
+  connectionString: process.env.PROJECT_DATABASE_URL,
 });
 
 // テーブル作成クエリを定義
