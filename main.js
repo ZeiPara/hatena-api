@@ -132,6 +132,7 @@ app.post('/createproject', authenticateToken, async (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
+  console.log("ログインを受け付けました");
   if (!username || !password) {
     return res.status(400).json({ error: 'ユーザー名とパスワードを入力してください' });
   }
