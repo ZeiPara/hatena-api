@@ -13,7 +13,9 @@
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "crypto": "^4.2.0",
+    "cookie-parser":"^1.4.7"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
