@@ -1,11 +1,14 @@
 require('dotenv').config(); // 環境変数を読み込む
 const express = require('express');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
+app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 
@@ -38,6 +41,51 @@ const authenticateToken = (req, res, next) => {
 
 // サーバーが動いていることを確認するログ
 setInterval(() => console.log("サーバーは稼働中"), 10000);
+
+const SCRATCH_AUTH_URL = 'https://auth.itinerary.eu.org/auth/';
+const CALLBACK_URL = 'https://hatena-scratch.f5.si/auth/callback';
+
+app.get('/auth/login', async (req, res) => {
+    const userId = req.query.userId; // ログイン中のサイトアカウントのIDを取得
+
+    if (!userId) {
+        return res.status(400).send('User ID is required');
+    }
+
+    const redirectLocation = Buffer.from(`${CALLBACK_URL}?userId=${userId}`).toString('base64');
+    res.redirect(`${SCRATCH_AUTH_URL}?redirect=${redirectLocation}&name=hatena-scratch`);
+});
+
+app.get('/auth/callback', async (req, res) => {
+    const { privateCode, userId } = req.query;
+
+    if (!privateCode || !userId) {
+        return res.status(400).send('Invalid request');
+    }
+
+    try {
+        // Scratch Auth で privateCode を確認
+        const response = await fetch(`https://auth.itinerary.eu.org/api/auth/verifyToken?privateCode=${privateCode}`);
+        const data = await response.json();
+
+        if (data.valid) {
+            // PostgreSQL に保存（サイトアカウントと Scratch アカウントを紐付け）
+            const client = await pool.connect();
+            await client.query(
+                `UPDATE users SET scratch_username = $1 WHERE id = $2`,
+                [data.username, userId]
+            );
+            client.release();
+
+            res.redirect('https://hatena-scratch.f5.si'); // アカウントページにリダイレクト
+        } else {
+            res.status(403).send('Authentication failed');
+        }
+    } catch (error) {
+        console.error('Authentication error:', error);
+        res.status(500).send('Server error');
+    }
+});
 
 // ルートエンドポイント
 app.get('/', (req, res) => {
