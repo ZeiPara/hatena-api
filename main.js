@@ -45,6 +45,11 @@ setInterval(() => console.log("サーバーは稼働中"), 10000);
 const SCRATCH_AUTH_URL = 'https://auth.itinerary.eu.org/auth/';
 const CALLBACK_URL = 'https://hatena-scratch.f5.si/auth/callback';
 
+app.get('/scratch/check', async (resq, res) => {
+  const username = req.
+  const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+}
+
 app.get('/auth/login', async (req, res) => {
     const userId = req.query.userId; // ログイン中のサイトアカウントのIDを取得
 
