@@ -49,8 +49,7 @@ app.get('/scratch/check', async (req, res) => {
   const username = req.query.username; // ここでusernameを取得
   const client = await pool.connect(); // clientを接続
   const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
-  client.release(); // 接続を解放
-  // ここで結果を返す処理を追加
+  client.release(); // 接続を解
 }
 
 app.get('/auth/login', async (req, res) => {
