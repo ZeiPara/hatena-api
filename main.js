@@ -50,7 +50,8 @@ app.get('/scratch/check', async (req, res) => {
   const client = await pool.connect(); // clientを接続
   const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
   client.release(); // 接続を解
-}
+  res.json(result.rows); // 結果を返す
+});
 
 app.get('/auth/login', async (req, res) => {
     const userId = req.query.userId; // ログイン中のサイトアカウントのIDを取得
