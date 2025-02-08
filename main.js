@@ -172,7 +172,7 @@ app.post('/createproject', authenticateToken, async (req, res) => {
   const client = await projectpool.connect();
   try {
     await client.query(
-      'INSERT INTO projects (user, content, date, title) VALUES ($1, $2, $3, $4)',
+      'INSERT INTO hatena-project(user, content, date, title) VALUES ($1, $2, $3, $4)',
       [user, content, date, title]
     );
     res.status(201).json({ message: 'プロジェクトが作成されました' });
