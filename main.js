@@ -43,7 +43,7 @@ const authenticateToken = (req, res, next) => {
 setInterval(() => console.log("サーバーは稼働中"), 10000);
 
 const SCRATCH_AUTH_URL = 'https://auth.itinerary.eu.org/auth/';
-const CALLBACK_URL = 'https://hatena-scratch.f5.si/auth/callback';
+const CALLBACK_URL = 'https://api.hatena-scratch.f5.si/auth/callback';
 
 app.get('/scratch/check', async (req, res) => {
   const username = req.query.username; // ここでusernameを取得
