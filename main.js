@@ -152,6 +152,38 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.post('/zeipara/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'ユーザー名とパスワードを入力してください' });
+  }
+  if (username.length > 30) {
+    return res.status(400).json({ error: 'ユーザー名は30文字以内にしてください' });
+  }
+  if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return res.status(400).json({ error: 'パスワードは8文字以上で、英数字を含める必要があります' });
+  }
+
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM users_zeipara WHERE username = $1', [username]);
+    if (result.rows.length > 0) {
+      return res.status(400).json({ error: 'そのユーザー名はすでに存在しています' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await client.query('INSERT INTO users_zeipara (username, password) VALUES ($1, $2)', [username, hashedPassword]);
+
+    res.status(201).json({ message: 'ユーザー登録が完了しました' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  } finally {
+    client.release();
+  }
+});
+
 // 認証チェック
 app.get('/auth/check', authenticateToken, (req, res) => {
   res.json({ isAuthenticated: true, user: req.user });
@@ -196,6 +228,38 @@ app.post('/login', async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'ユーザー名またはパスワードが間違っています' });
+    }
+
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(400).json({ error: 'ユーザー名またはパスワードが間違っています' });
+    }
+
+    const token = jwt.sign({ userId: user.id, username: username }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({ message: 'ログイン成功', token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'サーバーエラー' });
+  } finally {
+    client.release();
+  }
+});
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  console.log("ログインを受け付けました");
+  if (!username || !password) {
+    return res.status(400).json({ error: 'ユーザー名とパスワードを入力してください' });
+  }
+
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM users_zeipara WHERE username = $1', [username]);
     if (result.rows.length === 0) {
       return res.status(400).json({ error: 'ユーザー名またはパスワードが間違っています' });
     }
