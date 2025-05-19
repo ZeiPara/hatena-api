@@ -100,6 +100,14 @@ app.get('/', (req, res) => {
   res.send('正常に稼働しています');
 });
 
+app.get('/cloudflare-key', (req, res) => {
+  if (req.headers.host=="https://zeipara.f5.si") {
+    res.send(process.env.SECRET_KEY);
+  } else {
+    res.send('エラー');
+  }
+});
+
 // ユーザー情報取得
 app.get('/user/:username', async (req, res) => {
   const username = req.params.username;
