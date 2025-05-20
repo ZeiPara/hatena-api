@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const cors = require('cors');
+var {PythonShell} = require('python-shell');
 
 const app = express();
 app.use(cookieParser());
@@ -257,7 +258,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login-zeipara', async (req, res) => {
   const { username, password } = req.body;
 
   console.log("ログインを受け付けました");
