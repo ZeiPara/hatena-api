@@ -16,14 +16,24 @@ app.use(express.json());
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 
-let Before_Vertical_Jump_Edgar = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1")).text();
+let Before_Vertical_Jump_Edgar;
+let Before_tanakasann1945;
+let Before_Hihamikunn;
+
 let Vertical_Jump_Edgar;
-
-let Before_tanakasann1945 = await (await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1")).text();
 let tanakasann1945;
-
-let Before_Hihamikunn = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1")).text();
 let Hihamikunn;
+
+async function initCommentData() {
+  const vje = await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1");
+  Before_Vertical_Jump_Edgar = await vje.text();
+
+  const tnk = await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1");
+  Before_tanakasann1945 = await tnk.text();
+
+  const hhm = await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1");
+  Before_Hihamikunn = await hhm.text();
+}
 
 // ── nodemailerの設定 ──
 const transporter = nodemailer.createTransport({
@@ -378,8 +388,8 @@ app.post('/login-zeipara', async (req, res) => {
   }
 });
 
-// サーバー起動
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+initCommentData().then(() => {
+  app.listen(process.env.PORT || 3000, () => {
+    console.log('サーバーが起動しました');
+  });
 });
