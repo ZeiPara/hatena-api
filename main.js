@@ -13,6 +13,94 @@ app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 
+const cron = require('node-cron');
+const nodemailer = require('nodemailer');
+
+let Before_Vertical_Jump_Edgar = await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1");
+let Vertical_Jump_Edgar;
+
+let Before_tanakasann1945 = await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1");
+let tanakasann1945;
+
+let Before_Hihamikunn = await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1");
+let Hihamikunn;
+
+// ── nodemailerの設定 ──
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,      // 例: "smtp.gmail.com"
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,                    // trueなら465, falseならTLS(587)
+  auth: {
+    user: process.env.SMTP_USER,    // SMTP認証ユーザー
+    pass: process.env.SMTP_PASS,    // SMTP認証パスワード
+  },
+});
+
+// メール送信関数
+async function sendPeriodicMail() {
+  Vertical_Jump_Edgar = await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1");
+  tanakasann1945  = await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1");
+  Hihamikunn = await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1");
+  
+  if (Vertical_Jump_Edgar!=Before_Vertical_Jump_Edgar) {
+    try {
+      const info = await transporter.sendMail({
+        from: process.env.MAIL_FROM,         // 送信元アドレス
+        to: process.env.MAIL_TO,             // 送信先（カンマ区切りで複数可）
+        subject: 'コメント観察',
+        text: 'Vertical_Jump_Edgar',  // プレーンテキスト
+        // html: '<p>HTMLメールもいけるよ</p>',
+      });
+      console.log('メール送信成功:', info.messageId);
+    } catch (err) {
+      console.error('メール送信失敗:', err);
+    }
+  }
+
+  if (tanakasann1945!=Before_tanakasann1945) {
+    try {
+      const info = await transporter.sendMail({
+        from: process.env.MAIL_FROM,         // 送信元アドレス
+        to: process.env.MAIL_TO,             // 送信先（カンマ区切りで複数可）
+        subject: 'コメント観察',
+        text: 'tanakasann1945',  // プレーンテキスト
+        // html: '<p>HTMLメールもいけるよ</p>',
+      });
+      console.log('メール送信成功:', info.messageId);
+    } catch (err) {
+      console.error('メール送信失敗:', err);
+    }
+  }
+
+  if (Hihamikunn!=Before_Hihamikunn) {
+    try {
+      const info = await transporter.sendMail({
+        from: process.env.MAIL_FROM,         // 送信元アドレス
+        to: process.env.MAIL_TO,             // 送信先（カンマ区切りで複数可）
+        subject: 'コメント観察',
+        text: 'Hihamikunn',  // プレーンテキスト
+        // html: '<p>HTMLメールもいけるよ</p>',
+      });
+      console.log('メール送信成功:', info.messageId);
+    } catch (err) {
+      console.error('メール送信失敗:', err);
+    }
+  }
+
+  Before_Vertical_Jump_Edgar = Vertical_Jump_Edgar;
+  Before_tanakasann1945 = tanakasann1945;
+  Before_Hihamikunn = Hihamikunn;
+}
+
+// ── cronでスケジュール設定 ──
+// 例：毎日午前9時に送信したい場合
+cron.schedule('*/3 * * * *', () => {
+  console.log('処理');
+  sendPeriodicMail();
+}, {
+  timezone: 'Asia/Tokyo'
+});
+
 const pool = new Pool({
   connectionString: process.env.USER_DATABASE_URL,
 });
