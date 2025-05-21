@@ -1,5 +1,6 @@
 require('dotenv').config(); // 環境変数を読み込む
 const express = require('express');
+const fetch = require('node-fetch');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
