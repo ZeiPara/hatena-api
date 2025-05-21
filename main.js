@@ -7,7 +7,6 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const cors = require('cors');
-var {PythonShell} = require('python-shell');
 
 const app = express();
 app.use(cookieParser());
