@@ -16,13 +16,13 @@ app.use(express.json());
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 
-let Before_Vertical_Jump_Edgar = await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1");
+let Before_Vertical_Jump_Edgar = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1")).text();
 let Vertical_Jump_Edgar;
 
-let Before_tanakasann1945 = await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1");
+let Before_tanakasann1945 = await (await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1")).text();
 let tanakasann1945;
 
-let Before_Hihamikunn = await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1");
+let Before_Hihamikunn = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1")).text();
 let Hihamikunn;
 
 // ── nodemailerの設定 ──
@@ -38,9 +38,9 @@ const transporter = nodemailer.createTransport({
 
 // メール送信関数
 async function sendPeriodicMail() {
-  Vertical_Jump_Edgar = await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1");
-  tanakasann1945  = await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1");
-  Hihamikunn = await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1");
+  Vertical_Jump_Edgar = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1")).text();
+  tanakasann1945  = await (await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1")).text();
+  Hihamikunn = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1")).text();
   
   if (Vertical_Jump_Edgar!=Before_Vertical_Jump_Edgar) {
     try {
