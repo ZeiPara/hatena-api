@@ -37,12 +37,10 @@ async function initCommentData() {
 
 // ── nodemailerの設定 ──
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,      // 例: "smtp.gmail.com"
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,                    // trueなら465, falseならTLS(587)
+  service: 'gmail',
   auth: {
-    user: process.env.SMTP_USER,    // SMTP認証ユーザー
-    pass: process.env.SMTP_PASS,    // SMTP認証パスワード
+    user: 'linguitou759@gmail.com',
+    pass: 'subp itfb wabo sukb',
   },
 });
 
