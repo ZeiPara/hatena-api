@@ -16,23 +16,12 @@ app.use(express.json());
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 
-let Before_Vertical_Jump_Edgar;
-let Before_tanakasann1945;
-let Before_Hihamikunn;
-
-let Vertical_Jump_Edgar;
-let tanakasann1945;
-let Hihamikunn;
+let Before_kodamann;
+let kodamann;
 
 async function initCommentData() {
-  const vje = await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1");
-  Before_Vertical_Jump_Edgar = await vje.text();
-
-  const tnk = await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1");
-  Before_tanakasann1945 = await tnk.text();
-
-  const hhm = await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1");
-  Before_Hihamikunn = await hhm.text();
+  const kdm = await fetch("https://scratch.mit.edu/site-api/comments/user/kodmann/?page=1");
+  Before_kodamann = await kdm.text();
 }
 
 // ── nodemailerの設定 ──
@@ -46,17 +35,16 @@ const transporter = nodemailer.createTransport({
 
 // メール送信関数
 async function sendPeriodicMail() {
-  Vertical_Jump_Edgar = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Vertical_Jump_Edgar/?page=1")).text();
-  tanakasann1945  = await (await fetch("https://scratch.mit.edu/site-api/comments/user/tanakasann1945/?page=1")).text();
-  Hihamikunn = await (await fetch("https://scratch.mit.edu/site-api/comments/user/Hihamikunn/?page=1")).text();
-  
-  if (Vertical_Jump_Edgar!=Before_Vertical_Jump_Edgar) {
+  kodamann = await (await fetch("https://scratch.mit.edu/site-api/comments/user/kodmann/?page=1")).text();
+  console.log(String(kodamann));
+
+  if (kodamann !== Before_kodamann) {
     try {
       const info = await transporter.sendMail({
-        from: process.env.MAIL_FROM,         // 送信元アドレス
-        to: process.env.MAIL_TO,             // 送信先（カンマ区切りで複数可）
+        from: process.env.MAIL_FROM,        // 送信元アドレス
+        to: process.env.MAIL_TO,            // 送信先（カンマ区切りで複数可）
         subject: 'コメント観察',
-        text: 'Vertical_Jump_Edgar',  // プレーンテキスト
+        text: 'kodmann',  // プレーンテキスト
         // html: '<p>HTMLメールもいけるよ</p>',
       });
       console.log('メール送信成功:', info.messageId);
@@ -65,43 +53,10 @@ async function sendPeriodicMail() {
     }
   }
 
-  if (tanakasann1945!=Before_tanakasann1945) {
-    try {
-      const info = await transporter.sendMail({
-        from: process.env.MAIL_FROM,         // 送信元アドレス
-        to: process.env.MAIL_TO,             // 送信先（カンマ区切りで複数可）
-        subject: 'コメント観察',
-        text: 'tanakasann1945',  // プレーンテキスト
-        // html: '<p>HTMLメールもいけるよ</p>',
-      });
-      console.log('メール送信成功:', info.messageId);
-    } catch (err) {
-      console.error('メール送信失敗:', err);
-    }
-  }
-
-  if (Hihamikunn!=Before_Hihamikunn) {
-    try {
-      const info = await transporter.sendMail({
-        from: process.env.MAIL_FROM,         // 送信元アドレス
-        to: process.env.MAIL_TO,             // 送信先（カンマ区切りで複数可）
-        subject: 'コメント観察',
-        text: 'Hihamikunn',  // プレーンテキスト
-        // html: '<p>HTMLメールもいけるよ</p>',
-      });
-      console.log('メール送信成功:', info.messageId);
-    } catch (err) {
-      console.error('メール送信失敗:', err);
-    }
-  }
-
-  Before_Vertical_Jump_Edgar = Vertical_Jump_Edgar;
-  Before_tanakasann1945 = tanakasann1945;
-  Before_Hihamikunn = Hihamikunn;
+  Before_kodamann = kodamann;
 }
 
 // ── cronでスケジュール設定 ──
-// 例：毎日午前9時に送信したい場合
 cron.schedule('*/3 * * * *', () => {
   console.log('処理');
   sendPeriodicMail();
@@ -150,6 +105,10 @@ app.get('/scratch/check', async (req, res) => {
   res.json(result.rows); // 結果を返す
 });
 
+app.get('/kodmann', async (req,res) => {
+  res.json(String(kodamann));
+})
+
 app.get('/auth/login', async (req, res) => {
     const userId = req.query.userId; // ログイン中のサイトアカウントのIDを取得
 
@@ -157,8 +116,8 @@ app.get('/auth/login', async (req, res) => {
         return res.status(400).send('User ID is required');
     }
 
-    const redirectLocation = Buffer.from(`${CALLBACK_URL}?userId=${userId}`).toString('base64');
-    res.redirect(`${SCRATCH_AUTH_URL}?redirect=${redirectLocation}&name=hatena-scratch`);
+    const redirectLocation = Buffer.from(`<span class="math-inline">\{CALLBACK\_URL\}?userId\=</span>{userId}`).toString('base64');
+    res.redirect(`<span class="math-inline">\{SCRATCH\_AUTH\_URL\}?redirect\=</span>{redirectLocation}&name=hatena-scratch`);
 });
 
 app.get('/auth/callback', async (req, res) => {
