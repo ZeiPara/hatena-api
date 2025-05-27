@@ -106,7 +106,7 @@ app.get('/scratch/check', async (req, res) => {
 });
 
 app.get('/kodmann', async (req,res) => {
-  res.json(kodamann);
+  res.json(String(kodamann)[0:30] + "...");
 })
 
 app.get('/auth/login', async (req, res) => {
