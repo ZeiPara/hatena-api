@@ -20,7 +20,7 @@ let Before_kodamann;
 let kodamann;
 
 async function initCommentData() {
-  const kdm = await fetch("https://scratch.mit.edu/site-api/comments/user/kodmann/?page=1");
+  const kdm = await fetch("https://scratch.mit.edu/site-api/comments/project/1034844344/?page=1");
   Before_kodamann = await kdm.text();
 }
 
@@ -35,7 +35,7 @@ const transporter = nodemailer.createTransport({
 
 // メール送信関数
 async function sendPeriodicMail() {
-  kodamann = await (await fetch("https://scratch.mit.edu/site-api/comments/user/kodmann/?page=1")).text();
+  kodamann = await (await fetch("https://scratch.mit.edu/site-api/comments/project/1034844344/?page=1")).text();
   console.log(String(kodamann));
 
   if (kodamann !== Before_kodamann) {
@@ -44,7 +44,7 @@ async function sendPeriodicMail() {
         from: process.env.MAIL_FROM,        // 送信元アドレス
         to: process.env.MAIL_TO,            // 送信先（カンマ区切りで複数可）
         subject: 'コメント観察',
-        text: 'kodmann',  // プレーンテキスト
+        text: kodamann,  // プレーンテキスト
         // html: '<p>HTMLメールもいけるよ</p>',
       });
       console.log('メール送信成功:', info.messageId);
@@ -106,7 +106,7 @@ app.get('/scratch/check', async (req, res) => {
 });
 
 app.get('/kodmann', async (req,res) => {
-  res.json(String(kodamann));
+  res.json(kodamann);
 })
 
 app.get('/auth/login', async (req, res) => {
