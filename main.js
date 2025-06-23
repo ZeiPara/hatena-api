@@ -57,12 +57,12 @@ async function sendPeriodicMail() {
 }
 
 // ── cronでスケジュール設定 ──
-cron.schedule('*/3 * * * *', () => {
-  console.log('処理');
-  sendPeriodicMail();
-}, {
-  timezone: 'Asia/Tokyo'
-});
+//cron.schedule('*/3 * * * *', () => {
+//  console.log('処理');
+//  sendPeriodicMail();
+//}, {
+//  timezone: 'Asia/Tokyo'
+//});
 
 const pool = new Pool({
   connectionString: process.env.USER_DATABASE_URL,
