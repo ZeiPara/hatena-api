@@ -345,9 +345,13 @@ app.post('/login-zeipara', async (req, res) => {
   }
 });
 
-initCommentData().then(() => {
-  initCommentData();
-  app.listen(process.env.PORT || 3000, () => {
-    console.log('サーバーが起動しました');
-  });
+//initCommentData().then(() => {
+//  initCommentData();
+//  app.listen(process.env.PORT || 3000, () => {
+//    console.log('サーバーが起動しました');
+//  });
+//});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log('サーバーが起動しました');
 });
