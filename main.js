@@ -105,9 +105,9 @@ app.get('/scratch/check', async (req, res) => {
   res.json(result.rows); // 結果を返す
 });
 
-app.get('/kodmann', async (req,res) => {
-  res.json(String(kodamann)[0:30] + "...");
-})
+app.get('/kodmann', async (req, res) => {
+  res.json(String(kodamann).substring(0, 30) + "...");
+});
 
 app.get('/auth/login', async (req, res) => {
     const userId = req.query.userId; // ログイン中のサイトアカウントのIDを取得
